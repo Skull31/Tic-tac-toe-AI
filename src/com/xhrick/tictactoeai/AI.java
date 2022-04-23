@@ -42,23 +42,23 @@ public class AI {
 	// Method to do next move
 	public boolean doMove() {
 		switch (difficulty) {
-		case 'H':
-			return false;
-		case 'R':
-			whoseTurn = controller.getWhoseTurn();
-			randomMove();
-			break;
-		case 'M':
-			whoseTurn = controller.getWhoseTurn();
-			mediumMove();
-			break;
-		case 'I':
-			whoseTurn = controller.getWhoseTurn();
-			cellArray = new ArrayList<>();
-			cellArray.add(new ExtCell(controller.getCells()));
-			impossibleMove();
-			cellArray = null;
-			break;
+			case 'H':
+				return false;
+			case 'R':
+				whoseTurn = controller.getWhoseTurn();
+				randomMove();
+				break;
+			case 'M':
+				whoseTurn = controller.getWhoseTurn();
+				mediumMove();
+				break;
+			case 'I':
+				whoseTurn = controller.getWhoseTurn();
+				cellArray = new ArrayList<>();
+				cellArray.add(new ExtCell(controller.getCells()));
+				impossibleMove();
+				cellArray = null;
+				break;
 		}
 		return true;
 	}
@@ -121,10 +121,10 @@ public class AI {
 		ExtCell parentCell = cellArray.get(0);
 		ExtCell thisCell = null;
 
-		if (parentCell.getEmptySpaces() == 9) {
-			controller.getMoveFromAI(r.nextInt(3), r.nextInt(3));
-			return;
-		}
+		// if (parentCell.getEmptySpaces() == 9) {
+		// controller.getMoveFromAI(r.nextInt(3), r.nextInt(3));
+		// return;
+		// }
 
 		while (position < cellArray.size()) {
 			parentCell = cellArray.get(position);
@@ -148,14 +148,14 @@ public class AI {
 				for (int j : jL) {
 					if (parentCell.getCellsChar(i, j) == ' ') {
 						thisCell = new ExtCell(parentCell);
-						parentCell.addKid(thisCell);
+						parentCell.addChild(thisCell);
 						thisCell.setCellsChar(whoseTurn, i, j);
 						thisCell.dicreaseEmptySpaces();
 
 						if (thisCell.isWon() == myToken) {
-							thisCell.setScore(0 + thisCell.getEmptySpaces() + 1);
+							thisCell.setScore((thisCell.getEmptySpaces()) + 1);
 						} else if (thisCell.isWon() == ((myToken == 'X') ? 'O' : 'X')) {
-							thisCell.setScore((0 - thisCell.getEmptySpaces() - 1));
+							thisCell.setScore(-(thisCell.getEmptySpaces()) - 1);
 						} else {
 							thisCell.setScore(0);
 						}
@@ -171,54 +171,51 @@ public class AI {
 		// Set scored from the bottom of the tree to the top.
 		for (int i = cellArray.size() - 1; i >= 0; i--) {
 			choosenValue(cellArray.get(i));
+			// System.out.println(cellArray.get(i).getScore());
 		}
 
-		//System.out.println("kido: ");
-		ExtCell bestKid = cellArray.get(0).getKids().get(0);
-		for (ExtCell kido : cellArray.get(0).getKids()) {
-			//System.out.println(kido.getScore());
-			if (bestKid.getScore() < kido.getScore())
-				bestKid = kido;
+		System.out.println("Child: ");
+		ExtCell bestChild = cellArray.get(0).getChildren().get(0);
+		for (ExtCell child : cellArray.get(0).getChildren()) {
+			System.out.println(child.getScore());
+			if (bestChild.getScore() < child.getScore())
+				bestChild = child;
 		}
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				if (bestKid.getCellsChar(i, j) != cellArray.get(0).getCellsChar(i, j))
+				if (bestChild.getCellsChar(i, j) != cellArray.get(0).getCellsChar(i, j))
 					controller.getMoveFromAI(j, i);
 			}
 		}
 	}
 
-	// Method to set score on current ExtCell from their kids
+	// Method to set score on current ExtCell from their children
 	private void choosenValue(ExtCell parent) {
-		int bestValue;
-		if (myToken == 'O') {
-			if (parent.getEmptySpaces() % 2 == 0)
-				bestValue = -10;
-			else
-				bestValue = 10;
-		} else {
-			if (parent.getEmptySpaces() % 2 == 0)
-				bestValue = 10;
-			else
-				bestValue = -10;
+		if (parent.getChildren().size() <= 0)
+			return;
+		int lowestValue = parent.getChildren().get(0).getScore();
+		int highestValue = parent.getChildren().get(0).getScore();
+
+		for (ExtCell child : parent.getChildren()) {
+			if (child.getScore() < lowestValue)
+				lowestValue = child.getScore();
+			if (child.getScore() > highestValue)
+				highestValue = child.getScore();
 		}
 
-		if (parent.getKids().size() > 0) {
-			for (ExtCell kido : parent.getKids()) {
-				if (myToken == 'O') {
-					if (parent.getEmptySpaces() % 2 == 0)
-						bestValue = (kido.getScore() > bestValue) ? kido.getScore() : bestValue;
-					else
-						bestValue = (kido.getScore() < bestValue) ? kido.getScore() : bestValue;
-				} else {
-					if (parent.getEmptySpaces() % 2 == 0)
-						bestValue = (kido.getScore() < bestValue) ? kido.getScore() : bestValue;
-					else
-						bestValue = (kido.getScore() > bestValue) ? kido.getScore() : bestValue;
-				}
+		if (myToken == 'O') {
+			if (parent.getEmptySpaces() % 2 == 0) {
+				parent.setScore(highestValue);
+			} else {
+				parent.setScore(lowestValue);
 			}
-			parent.setScore(bestValue);
+		} else {
+			if (parent.getEmptySpaces() % 2 == 0) {
+				parent.setScore(lowestValue);
+			} else {
+				parent.setScore(highestValue);
+			}
 		}
 	}
 

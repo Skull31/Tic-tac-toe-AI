@@ -10,7 +10,7 @@ public class ExtCell {
 	private int score = 0;
 	
 	private ExtCell parentGame = null;
-	private ArrayList<ExtCell> kids = new ArrayList<>();
+	private ArrayList<ExtCell> children = new ArrayList<>();
 
 	public ExtCell(Cell[][] cell) {
 		for (int i = 0; i < 3; i++) {
@@ -107,12 +107,12 @@ public class ExtCell {
 		emptySpaces--;
 	}
 
-	public void addKid(ExtCell kid) {
-		kids.add(kid);
+	public void addChild(ExtCell child) {
+		children.add(child);
 	}
 
-	public ArrayList<ExtCell> getKids() {
-		return kids;
+	public ArrayList<ExtCell> getChildren() {
+		return children;
 	}
 	
 	public void setScore(int score) {
