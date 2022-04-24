@@ -209,7 +209,7 @@ public class GameUi extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					controller.changeDifficulty('I');
-					//newGame();
+					newGame();
 					changeDifficultyLabel("Difficulty: Impossible");
 				}
 			});
@@ -219,7 +219,7 @@ public class GameUi extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					JOptionPane.showMessageDialog(getOuter(),
-						    "Author: Tomáš Hricko\nVersion: v3.0",
+						    "Author: Tomáš Hricko\nVersion: v3.1",
 						    "About Tic-tac-toe",
 						    JOptionPane.INFORMATION_MESSAGE);
 					

@@ -19,8 +19,6 @@ public class AI {
 	private char whoseTurn;
 	private Random r = new Random();
 
-	private List<ExtCell> cellArray = null;
-
 	// AI constructor
 	public AI() {
 		difficulty = 'I';
@@ -56,10 +54,7 @@ public class AI {
 				break;
 			case 'I':
 				this.whoseTurn = whoseTurn;
-				cellArray = new ArrayList<>();
-				cellArray.add(new ExtCell(cells));
-				moveAI = impossibleMove();
-				cellArray = null;
+				moveAI = impossibleMove(cells);
 				break;
 		}
 		return moveAI;
@@ -121,8 +116,11 @@ public class AI {
 	}
 
 	// Impossible difficulty algorithm
-	private int[] impossibleMove() {
+	private int[] impossibleMove(Cell[][] cells) {
 		int position = 0;
+
+		List<ExtCell> cellArray = new ArrayList<>();
+		cellArray.add(new ExtCell(cells));
 
 		ExtCell parentCell = cellArray.get(0);
 		ExtCell thisCell = null;
