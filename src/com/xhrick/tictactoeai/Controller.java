@@ -7,7 +7,7 @@ public class Controller {
 	private GameUi gameUi;
 	private Cell[][] cells = new Cell[3][3];
 	private AI ai;
-	
+
 	private boolean firstPc = false;
 	private boolean isEnd = false;
 
@@ -15,7 +15,7 @@ public class Controller {
 
 	public Controller(GameUi gameUi) {
 		this.gameUi = gameUi;
-		ai = new AI(this);
+		ai = new AI();
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				cells[i][j] = new Cell(j, i);
@@ -38,9 +38,16 @@ public class Controller {
 	public void pcStart() {
 		if (isEnd || firstPc)
 			return;
-		ai.setMyToken(whoseTurn);
-		if (!ai.doMove())
+
+		int[] fromAI;
+
+		if (ai.getDifficulty() == 'H')
 			return;
+
+		ai.setMyToken(whoseTurn);
+		fromAI = ai.doMove(whoseTurn, cells);
+		getMoveFromAI(fromAI[0], fromAI[1]);
+
 		if (afterMove())
 			return;
 
@@ -52,6 +59,7 @@ public class Controller {
 
 		int x = cell.getX();
 		int y = cell.getY();
+		int[] fromAI;
 
 		cells[y][x].setToken(whoseTurn);
 		gameUi.cellRepaint(x, y);
@@ -59,8 +67,12 @@ public class Controller {
 		if (afterMove())
 			return;
 
-		if (!ai.doMove())
+		if (ai.getDifficulty() == 'H')
 			return;
+
+		fromAI = ai.doMove(whoseTurn, cells);
+		getMoveFromAI(fromAI[0], fromAI[1]);
+
 		if (afterMove())
 			return;
 
@@ -71,25 +83,25 @@ public class Controller {
 		if (isWon() != 'N') {
 			isEnd = true;
 			switch (isWon()) {
-			case 'T':
-				int e = JOptionPane.showConfirmDialog(gameUi,
-						"Tie game!\n\nNew game?",
-						"Game over!",
-						JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-				
-				gameUi.changeStatusLabel("Tie game!");
-				if(e == JOptionPane.YES_OPTION)
-					gameUi.newGame();
-				break;
-			default:
-				int ee =  JOptionPane.showConfirmDialog(gameUi,
-						whoseTurn + " is winner!\n\nNew game?",
-						"Game over!",
-						JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-				
-				gameUi.changeStatusLabel(whoseTurn + " is winner!");
-				if(ee == JOptionPane.YES_OPTION)
-					gameUi.newGame();
+				case 'T':
+					int e = JOptionPane.showConfirmDialog(gameUi,
+							"Tie game!\n\nNew game?",
+							"Game over!",
+							JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+					gameUi.changeStatusLabel("Tie game!");
+					if (e == JOptionPane.YES_OPTION)
+						gameUi.newGame();
+					break;
+				default:
+					int ee = JOptionPane.showConfirmDialog(gameUi,
+							whoseTurn + " is winner!\n\nNew game?",
+							"Game over!",
+							JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+
+					gameUi.changeStatusLabel(whoseTurn + " is winner!");
+					if (ee == JOptionPane.YES_OPTION)
+						gameUi.newGame();
 			}
 			return true;
 		}
@@ -98,7 +110,7 @@ public class Controller {
 		return false;
 	}
 
-	public void getMoveFromAI(int x, int y) {
+	private void getMoveFromAI(int x, int y) {
 		cells[y][x].setToken(whoseTurn);
 		gameUi.cellRepaint(x, y);
 	}

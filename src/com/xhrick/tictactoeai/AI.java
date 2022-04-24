@@ -17,21 +17,23 @@ public class AI {
 	private char difficulty;
 	private char myToken;
 	private char whoseTurn;
-	private Controller controller;
 	private Random r = new Random();
 
 	private List<ExtCell> cellArray = null;
 
 	// AI constructor
-	public AI(Controller controller) {
+	public AI() {
 		difficulty = 'I';
 		myToken = 'O';
-		this.controller = controller;
 	}
 
 	// Change AI's difficulty level
 	public void setDifficulty(char difficulty) {
 		this.difficulty = difficulty;
+	}
+
+	public char getDifficulty() {
+		return difficulty;
 	}
 
 	// Change AI's token
@@ -40,49 +42,53 @@ public class AI {
 	}
 
 	// Method to do next move
-	public boolean doMove() {
+	public int[] doMove(char whoseTurn, Cell[][] cells) {
+		int moveAI[] = new int[2];
+
 		switch (difficulty) {
-			case 'H':
-				return false;
 			case 'R':
-				whoseTurn = controller.getWhoseTurn();
-				randomMove();
+				this.whoseTurn = whoseTurn;
+				moveAI = randomMove(cells);
 				break;
 			case 'M':
-				whoseTurn = controller.getWhoseTurn();
-				mediumMove();
+				this.whoseTurn = whoseTurn;
+				moveAI = mediumMove(cells);
 				break;
 			case 'I':
-				whoseTurn = controller.getWhoseTurn();
+				this.whoseTurn = whoseTurn;
 				cellArray = new ArrayList<>();
-				cellArray.add(new ExtCell(controller.getCells()));
-				impossibleMove();
+				cellArray.add(new ExtCell(cells));
+				moveAI = impossibleMove();
 				cellArray = null;
 				break;
 		}
-		return true;
+		return moveAI;
 	}
 
 	// Random difficulty algorithm
-	private void randomMove() {
+	private int[] randomMove(Cell[][] cellsController) {
 
-		ExtCell cells = new ExtCell(controller.getCells());
+		ExtCell cells = new ExtCell(cellsController);
 		int x = r.nextInt(3);
 		int y = r.nextInt(3);
+		int moveAI[] = new int[2];
 
 		while (cells.getCellsChar(y, x) != ' ') {
 			x = r.nextInt(3);
 			y = r.nextInt(3);
 		}
 
-		controller.getMoveFromAI(x, y);
+		moveAI[0] = x;
+		moveAI[1] = y;
+		return moveAI;
 
 	}
 
 	// Medium difficulty algorithm
-	private void mediumMove() {
+	private int[] mediumMove(Cell[][] cellsController) {
 
-		ExtCell cells = new ExtCell(controller.getCells());
+		ExtCell cells = new ExtCell(cellsController);
+		int moveAI[] = new int[2];
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -90,8 +96,9 @@ public class AI {
 					continue;
 				cells.setCellsChar(myToken, i, j);
 				if (cells.isWon() == myToken) {
-					controller.getMoveFromAI(j, i);
-					return;
+					moveAI[0] = j;
+					moveAI[1] = i;
+					return moveAI;
 				}
 
 				cells.setCellsChar(' ', i, j);
@@ -103,28 +110,33 @@ public class AI {
 					continue;
 				cells.setCellsChar((myToken == 'X') ? 'O' : 'X', i, j);
 				if (cells.isWon() == ((myToken == 'X') ? 'O' : 'X')) {
-					controller.getMoveFromAI(j, i);
-					return;
+					moveAI[0] = j;
+					moveAI[1] = i;
+					return moveAI;
 				}
 				cells.setCellsChar(' ', i, j);
 			}
 		}
-		randomMove();
-		return;
-
+		return randomMove(cellsController);
 	}
 
 	// Impossible difficulty algorithm
-	private void impossibleMove() {
+	private int[] impossibleMove() {
 		int position = 0;
 
 		ExtCell parentCell = cellArray.get(0);
 		ExtCell thisCell = null;
 
-		// if (parentCell.getEmptySpaces() == 9) {
-		// controller.getMoveFromAI(r.nextInt(3), r.nextInt(3));
-		// return;
-		// }
+		int moveAI[] = new int[2];
+
+
+		//For performance reasons. If AI has first move, the move is random.
+		//Because AI always calculate all the fields with the same priority (0)
+		if (parentCell.getEmptySpaces() == 9) {
+			moveAI[0] = r.nextInt(3);
+			moveAI[1] = r.nextInt(3);
+			return moveAI;
+		}
 
 		while (position < cellArray.size()) {
 			parentCell = cellArray.get(position);
@@ -184,10 +196,13 @@ public class AI {
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				if (bestChild.getCellsChar(i, j) != cellArray.get(0).getCellsChar(i, j))
-					controller.getMoveFromAI(j, i);
+				if (bestChild.getCellsChar(i, j) != cellArray.get(0).getCellsChar(i, j)) {
+					moveAI[0] = j;
+					moveAI[1] = i;
+				}
 			}
 		}
+		return moveAI;
 	}
 
 	// Method to set score on current ExtCell from their children
